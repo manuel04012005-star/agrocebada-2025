@@ -1,0 +1,394 @@
+<title>AgroCebada 2025 Yield Forecast</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&family=Carlito:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: ~1180px column, same look as the team EDA deck (deep green, wheat gold, white panels); map + parcel card, then EDA bridge, model, table. */
+:root{
+  --bg:#eef2ee; --panel:#ffffff; --ink:#1c2a24; --ink-2:#46564e; --ink-3:#6f7d76; --line:#d8e0da; --grid:#e8ede9;
+  --accent:#234a3c; --accent-ink:#ffffff; --gold:#9a7b1f; --pred:#9a7b1f; --hover:#e9efea; --band:#234a3c; --band-ink:#ffffff; --band-gold:#d8c47e;
+  --y1:#e4efd9; --y2:#bfdca6; --y3:#8fc178; --y4:#5aa055; --y5:#307a3f; --y6:#14522a;
+  --f-display:"Arimo",Arial,"Helvetica Neue",sans-serif; --f-body:"Carlito",Calibri,"Segoe UI",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#17302a; --panel:#1f3d34; --ink:#f1f3ee; --ink-2:#c9d3cc; --ink-3:#97a89f; --line:#2f5246; --grid:#294a3f;
+  --accent:#d8c47e; --accent-ink:#17302a; --gold:#d8c47e; --pred:#d8c47e; --hover:#27483e; --band:#2e5a4a; --band-ink:#f1f3ee; --band-gold:#d8c47e;
+  --y1:#253528; --y2:#2f5a37; --y3:#3f7f47; --y4:#5ea55c; --y5:#93cb7d; --y6:#cdeab4; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17302a; --panel:#1f3d34; --ink:#f1f3ee; --ink-2:#c9d3cc; --ink-3:#97a89f; --line:#2f5246; --grid:#294a3f;
+  --accent:#d8c47e; --accent-ink:#17302a; --gold:#d8c47e; --pred:#d8c47e; --hover:#27483e; --band:#2e5a4a; --band-ink:#f1f3ee; --band-gold:#d8c47e;
+  --y1:#253528; --y2:#2f5a37; --y3:#3f7f47; --y4:#5ea55c; --y5:#93cb7d; --y6:#cdeab4; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px;display:grid;gap:44px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em;color:var(--accent)}
+h1{font-size:clamp(30px,5vw,50px);font-weight:700;line-height:1.08;color:var(--band-ink)}
+h2{font-size:24px;font-weight:700}
+h3{font-size:15.5px;font-weight:700;color:var(--ink)}
+p{margin:0;max-width:68ch}
+.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.muted{color:var(--ink-2)} .small{font-size:13px}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+header{display:grid;gap:14px;background:var(--band);color:var(--band-ink);border-radius:8px;padding:clamp(22px,4vw,40px)}
+header .eyebrow{color:var(--band-gold);font-family:var(--f-body);font-weight:700;letter-spacing:.06em}
+header .team{display:flex;flex-wrap:wrap;gap:4px 18px;color:var(--band-gold);font-size:15px}
+header .lead{font-size:17px;color:var(--band-ink);opacity:.88}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:10px}
+.kpi{background:rgba(255,255,255,.08);padding:16px 18px;display:grid;gap:6px;align-content:start;border-radius:4px}
+.kpi b{font:600 30px/1 var(--f-mono);font-variant-numeric:tabular-nums}
+.kpi b small{font-size:14px;font-weight:400;opacity:.7;margin-left:4px}
+.kpi span{font-size:13.5px;opacity:.85}
+section{display:grid;gap:16px}
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px}
+.sec-head > div{display:grid;gap:6px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}
+.mapgrid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}
+.mapbox{position:relative;overflow:hidden;min-width:0}
+#map{display:block;width:100%;height:560px;touch-action:none;cursor:grab}
+#map.drag{cursor:grabbing}
+.map-tools{position:absolute;top:10px;left:10px;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 20px)}
+.chip{font:500 12px/1 var(--f-body);border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 10px;border-radius:999px;cursor:pointer}
+.chip:hover{background:var(--hover)} .chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip:focus-visible,button:focus-visible,select:focus-visible,th:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.zoom{position:absolute;right:10px;top:10px;display:grid;gap:4px}
+.zoom button{width:32px;height:32px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:var(--r);font:600 16px/1 var(--f-mono);cursor:pointer}
+.legend{position:absolute;left:10px;bottom:10px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;display:grid;gap:6px;font-size:12px;color:var(--ink-2)}
+.ramp{display:flex;gap:2px} .ramp i{width:26px;height:10px;border-radius:2px;display:block}
+.ramp-lab{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:11px}
+.leg-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.sw{display:inline-flex;align-items:center;gap:5px}
+.sw svg{flex:none}
+.detail{padding:18px;display:grid;gap:14px;align-content:start}
+.detail .big{font:600 40px/1 var(--f-mono);font-variant-numeric:tabular-nums}
+.detail .big small{font-size:15px;color:var(--ink-3);font-weight:400;margin-left:4px}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13.5px;margin:0}
+.dl dt{color:var(--ink-3)} .dl dd{margin:0;text-align:right}
+.pill{display:inline-flex;align-items:center;gap:6px;font:500 11px/1 var(--f-mono);letter-spacing:.05em;text-transform:uppercase;padding:5px 8px;border-radius:999px;border:1px solid currentColor}
+.pill.tr{color:var(--accent)} .pill.pr{color:var(--pred)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12.5px;padding:7px 9px;border-radius:5px;white-space:nowrap;transform:translate(-50%,calc(-100% - 12px));z-index:5}
+.tip[hidden]{display:none}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.chart{padding:16px 16px 10px;display:grid;gap:10px;min-width:0;position:relative;align-content:start}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.axis text{fill:var(--ink-3);font:11px var(--f-mono)} .axis line,.axis path{stroke:var(--line)}
+.gridl{stroke:var(--grid)}
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font:500 11.5px/1.2 var(--f-mono);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);position:sticky;top:0;background:var(--panel);cursor:pointer;user-select:none}
+th[aria-sort="ascending"]::after{content:" ↑"} th[aria-sort="descending"]::after{content:" ↓"}
+td.r,th.r{text-align:right}
+tbody tr{cursor:pointer} tbody tr:hover{background:var(--hover)}
+tr.best td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.bar-cell{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.bar-cell i{display:block;height:8px;border-radius:0 4px 4px 0;background:var(--y4)}
+.swatch{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:500 13px/1 var(--f-body);padding:9px 12px;border-radius:var(--r);border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.toast{font-size:12.5px;color:var(--accent)}
+.method{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.method .panel{padding:18px;display:grid;gap:8px;align-content:start}
+.method ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:14px;color:var(--ink-2)}
+.note{font-size:13px;color:var(--ink-3)}
+.mtiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mtile{background:var(--band);color:var(--band-ink);border-radius:4px;padding:10px 12px;display:grid;gap:2px}
+.mtile span{font:700 11px/1 var(--f-body);letter-spacing:.08em;color:var(--band-gold)}
+.mtile b{font:600 24px/1.1 var(--f-mono);font-variant-numeric:tabular-nums}
+.mtile small{font-size:12px;opacity:.8}
+.vgroups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}
+.vgroup{display:grid;gap:4px;align-content:start}
+.vgroup ul{margin:0;padding-left:16px;font-size:13.5px;color:var(--ink-2);display:grid;gap:1px}
+@media (max-width:520px){.vgroups{grid-template-columns:minmax(0,1fr)}.mtiles{grid-template-columns:minmax(0,1fr)}}
+.howto{display:grid;gap:4px;max-width:80ch}.howto b{color:var(--ink)}.howto ul{margin:0;padding-left:18px;display:grid;gap:3px}
+.eda{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.eda .panel{display:grid;grid-template-rows:auto 1fr auto;overflow:hidden}
+.eda .found{padding:16px 18px;display:grid;gap:6px;align-content:start}
+.eda .slide{font:500 11px/1 var(--f-mono);color:var(--ink-3);letter-spacing:.05em;text-transform:uppercase}
+.eda .found p{font-size:14.5px;color:var(--ink-2)}
+.eda .found b{color:var(--ink)}
+.take{background:var(--band);color:var(--band-ink);padding:12px 18px 14px;display:grid;gap:4px}
+.take span{font:700 11px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--band-gold)}
+.take p{font-size:14.5px;font-weight:700}
+footer{border-top:1px solid var(--line);padding-top:16px;font-size:12.5px;color:var(--ink-3);display:grid;gap:4px}
+@media (max-width:900px){.mapgrid,.two,.method,.eda{grid-template-columns:minmax(0,1fr)} .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} #map{height:440px}}
+@media (prefers-reduced-motion:no-preference){.par{transition:opacity .15s}}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">REGIONAL BARLEY · FIRA · Reto AgroCebada 2026</span>
+    <h1>Barley yield forecast for the 59 blind parcels, 2025 season</h1>
+    <p class="lead">A model trained on the 138 parcels with known yield in Hidalgo, Puebla and Tlaxcala. It builds on our exploratory analysis of the Basic (Sentinel‑2, Landsat) and PRO (Planet) datasets, and adds CHIRPS/CHIRTS climate and INEGI CEM topography.</p>
+    <div class="team"><span>María Lucía López Ochoa</span><span>Manuel Sotos Baños</span><span>Valeria Peregrina De Sampedro</span><span>Ricardo Bañuelos Jesus</span></div>
+    <div class="kpis" id="kpis"></div>
+  </header>
+
+  <section id="mapa">
+    <div class="sec-head">
+      <div><span class="eyebrow">01 · Map</span><h2>Parcels by yield</h2>
+        <div class="muted small howto"><b>How to use the map</b>
+          <ul>
+            <li><b>Read the colors:</b> darker green means higher yield (t/ha). Circles are the 138 training parcels (observed yield); squares with a gold border are the 59 blind parcels (forecast yield).</li>
+            <li><b>Filter:</b> use <i>All</i>, <i>Blind only</i> or <i>Training only</i> on the right to highlight one group; the rest fade out.</li>
+            <li><b>Jump to a zone:</b> the municipality buttons at the top of the map (Chignahuapan, Calpulalpan, Singuilucan…) zoom straight to that group of parcels.</li>
+            <li><b>Move and zoom:</b> drag the map to pan; use the mouse wheel or the + and − buttons to zoom; ⌂ returns to the full view. Zoom in to see each parcel's real outline.</li>
+            <li><b>See details:</b> hover over a parcel to see its ID and yield; click it to open its card on the right with area, elevation, slope, 2025 rain and its NDVI curve compared with the average.</li>
+          </ul></div></div>
+      <div class="controls" role="group" aria-label="Which parcels to show">
+        <button class="chip" data-show="todas" aria-pressed="true">All</button>
+        <button class="chip" data-show="PREDICCION" aria-pressed="false">Blind only</button>
+        <button class="chip" data-show="ENTRENAMIENTO" aria-pressed="false">Training only</button>
+      </div>
+    </div>
+    <div class="mapgrid">
+      <div class="panel mapbox" id="mapbox">
+        <svg id="map" role="img" aria-label="Map of the 197 parcels colored by yield"></svg>
+        <div class="map-tools" id="zonas"></div>
+        <div class="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zreset" aria-label="Show all">⌂</button></div>
+        <div class="legend" id="legend"></div>
+        <div class="tip" id="tip" hidden></div>
+      </div>
+      <aside class="panel detail" id="detail" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <section id="modelo">
+    <div class="sec-head"><div><span class="eyebrow">02 · Variables</span><h2>Variables</h2>
+      <p class="muted small">What drives the forecast, and the variables the final model uses.</p></div></div>
+    <div class="two">
+      <div class="panel chart"><h3>Most influential variables</h3><p class="note">Permutation importance in the final model: how much RMSE worsens when the variable is shuffled.</p><svg id="imp" viewBox="0 0 520 420" aria-label="Variable importance"></svg></div>
+      <div class="panel chart" id="varsBox"><h3>Variables in our model</h3>
+        <div class="mtiles" id="mtiles"></div>
+        <div id="varGroups" class="vgroups"></div></div>
+    </div>
+  </section>
+
+  <section id="tabla">
+    <div class="sec-head">
+      <div><span class="eyebrow">03 · Deliverable</span><h2>Forecasts for the 59 blind parcels</h2>
+        <p class="muted small">The 80 % interval comes from the final model's out‑of‑sample residuals.</p></div>
+      <div class="controls">
+        <label class="small muted" for="festado">State</label>
+        <select id="festado" class="btn"><option value="">All</option></select>
+        <button class="btn primary" id="copycsv">Copy CSV</button><span class="toast" id="toast" role="status"></span>
+      </div>
+    </div>
+    <div class="panel tblwrap" style="max-height:560px;overflow:auto">
+      <table id="tpred"><thead><tr>
+        <th data-k="ID_POLIGONO" tabindex="0">Parcel</th><th data-k="Estado" tabindex="0">State</th><th data-k="Municipio" tabindex="0">Municipality</th>
+        <th data-k="AREA_HA" class="r" tabindex="0">Area (ha)</th><th data-k="pred" class="r" tabindex="0" aria-sort="descending">Forecast (t/ha)</th>
+        <th data-k="lo" class="r" tabindex="0">80 % interval</th><th data-k="prod" class="r" tabindex="0">Production (t)</th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <footer>
+    <span>Sources: Sentinel‑2 and Landsat (Basic dataset), Planet (PRO dataset), CHIRPS (Funk et al., 2015), CHIRTS‑ERA5 (Climate Hazards Center, 2025), INEGI CEM 4.0.</span>
+    <span>Reto AgroCebada 2026 · Data Science Seminar · Built in Python (pandas, numpy, scikit‑learn).</span>
+  </footer>
+</div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script>
+const D = JSON.parse(document.getElementById('data').textContent);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const NS = 'http://www.w3.org/2000/svg';
+const el = (t, a = {}, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+const fmt = (v, d = 2) => v == null || isNaN(v) ? '—' : v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+const P = D.parcelas; const byId = Object.fromEntries(P.map(p => [p.id, p]));
+const val = p => p.conjunto === 'PREDICCION' ? p.pred : p.real;
+
+// ---------- escala de color (secuencial, un tono) ----------
+const RAMP = ['--y1', '--y2', '--y3', '--y4', '--y5', '--y6'];
+const BREAKS = [2.75, 3.25, 3.75, 4.25, 4.75]; // t/ha
+const colorOf = v => `var(${RAMP[BREAKS.filter(b => v >= b).length]})`;
+
+// ---------- KPIs ----------
+(() => {
+  const m = D.metricas.find(x => x.modelo === D.elegido), base = D.metricas.find(x => x.modelo === D.base);
+  const preds = P.filter(p => p.conjunto === 'PREDICCION');
+  const meanPred = preds.reduce((s, p) => s + p.pred, 0) / preds.length;
+  const area = preds.reduce((s, p) => s + p.area, 0), prod = preds.reduce((s, p) => s + p.pred * p.area, 0);
+  const k = [
+    [fmt(meanPred), 't/ha', `Mean forecast yield across the ${preds.length} blind parcels`],
+    [fmt(prod, 0), 't', `Forecast production over ${fmt(area, 1)} ha`],
+    [fmt(m.rmse), 't/ha', `Typical error (RMSE) in cross‑validation; the municipality‑mean baseline gives ${fmt(base.rmse)}`],
+    [fmt(m.r2), '', 'Out‑of‑sample R²: share of yield variation explained'],
+  ];
+  document.getElementById('kpis').innerHTML = k.map(([v, u, t]) => `<div class="kpi"><b>${v}<small>${u}</small></b><span>${t}</span></div>`).join('');
+})();
+
+// ---------- MAPA ----------
+const svg = document.getElementById('map');
+const lat0 = P.reduce((s, p) => s + p.lat, 0) / P.length, kx = Math.cos(lat0 * Math.PI / 180);
+const proj = ([lon, lat]) => [lon * kx * 1000, -lat * 1000];
+let all = P.flatMap(p => D.geom[p.id].flat()).map(proj);
+const ext = { x0: Math.min(...all.map(q => q[0])), x1: Math.max(...all.map(q => q[0])), y0: Math.min(...all.map(q => q[1])), y1: Math.max(...all.map(q => q[1])) };
+const pad = 0.04 * (ext.x1 - ext.x0); const full = [ext.x0 - pad, ext.y0 - pad, ext.x1 - ext.x0 + 2 * pad, ext.y1 - ext.y0 + 2 * pad];
+let vb = [...full];
+const gPar = el('g', {}, svg), gDot = el('g', {}, svg);
+let filtro = 'todas', sel = null;
+P.forEach(p => {
+  const d = D.geom[p.id].map(r => 'M' + r.map(proj).map(q => q.map(n => n.toFixed(2)).join(',')).join('L') + 'Z').join('');
+  p._path = el('path', { d, class: 'par', 'fill-rule': 'evenodd' }, gPar);
+  const c = proj([p.lon, p.lat]); p._c = c;
+  p._dot = el(p.conjunto === 'PREDICCION' ? 'rect' : 'circle', { class: 'par' }, gDot);
+  [p._path, p._dot].forEach(e => {
+    e.addEventListener('pointerenter', ev => showTip(p, ev)); e.addEventListener('pointermove', ev => showTip(p, ev));
+    e.addEventListener('pointerleave', hideTip); e.addEventListener('click', () => select(p.id));
+  });
+});
+function styleMap() {
+  const s = vb[2] / svg.clientWidth; // unidades por pixel
+  const r = 5 * s, showDots = vb[2] > full[2] * 0.12;
+  const ink = 'var(--ink)', bg = 'var(--panel)', pred = 'var(--pred)';
+  P.forEach(p => {
+    const on = filtro === 'todas' || p.conjunto === filtro, c = colorOf(val(p)), isSel = sel === p.id;
+    const stroke = isSel ? ink : (p.conjunto === 'PREDICCION' ? pred : bg);
+    Object.assign(p._path.style, { opacity: on ? 1 : .12 });
+    p._path.style.fill = c; p._path.style.stroke = isSel ? ink : (p.conjunto === 'PREDICCION' ? pred : ink);
+    p._path.setAttribute('stroke-width', (isSel ? 2.5 : 1) * s); p._path.setAttribute('stroke-opacity', p.conjunto === 'PREDICCION' || isSel ? 1 : .35);
+    const d = p._dot; d.style.opacity = on ? 1 : .12; d.style.display = showDots ? '' : 'none';
+    d.style.fill = c; d.style.stroke = isSel ? ink : (p.conjunto === 'PREDICCION' ? pred : bg); d.setAttribute('stroke-width', (p.conjunto === 'PREDICCION' ? 2 : 1.5) * s);
+    if (p.conjunto === 'PREDICCION') { const h = r * 1.8; Object.entries({ x: p._c[0] - h / 2, y: p._c[1] - h / 2, width: h, height: h, rx: s }).forEach(([k, v]) => d.setAttribute(k, v)); }
+    else Object.entries({ cx: p._c[0], cy: p._c[1], r }).forEach(([k, v]) => d.setAttribute(k, v));
+  });
+  if (sel) { byId[sel]._path.parentNode.appendChild(byId[sel]._path); byId[sel]._dot.parentNode.appendChild(byId[sel]._dot); }
+}
+function setVB(v) {
+  const minW = full[2] * 0.02; if (v[2] < minW) { const k = minW / v[2]; v = [v[0] + v[2] * (1 - k) / 2, v[1] + v[3] * (1 - k) / 2, v[2] * k, v[3] * k]; }
+  vb = v; svg.setAttribute('viewBox', vb.join(' ')); svg.setAttribute('preserveAspectRatio', 'xMidYMid meet'); styleMap();
+}
+function fitTo(ids) {
+  const pts = ids.flatMap(id => D.geom[id].flat()).map(proj);
+  let x0 = Math.min(...pts.map(q => q[0])), x1 = Math.max(...pts.map(q => q[0])), y0 = Math.min(...pts.map(q => q[1])), y1 = Math.max(...pts.map(q => q[1]));
+  const w = Math.max(x1 - x0, full[2] * 0.03), h = Math.max(y1 - y0, full[3] * 0.03), m = 0.15;
+  setVB([(x0 + x1) / 2 - w * (0.5 + m), (y0 + y1) / 2 - h * (0.5 + m), w * (1 + 2 * m), h * (1 + 2 * m)]);
+}
+function zoomAt(f, cx, cy) {
+  if (cx == null) { cx = vb[0] + vb[2] / 2; cy = vb[1] + vb[3] / 2; }
+  setVB([cx - (cx - vb[0]) * f, cy - (cy - vb[1]) * f, vb[2] * f, vb[3] * f]);
+}
+function toSvg(ev) { const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+svg.addEventListener('wheel', ev => { ev.preventDefault(); const q = toSvg(ev); zoomAt(ev.deltaY > 0 ? 1.2 : 1 / 1.2, q.x, q.y); }, { passive: false });
+let drag = null;
+svg.addEventListener('pointerdown', ev => { drag = { x: ev.clientX, y: ev.clientY, vb: [...vb], moved: false }; });
+window.addEventListener('pointermove', ev => {
+  if (!drag) return; const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 3) { drag.moved = true; svg.classList.add('drag'); }
+  if (drag.moved) { const s = Math.max(drag.vb[2] / svg.clientWidth, drag.vb[3] / svg.clientHeight); setVB([drag.vb[0] - dx * s, drag.vb[1] - dy * s, drag.vb[2], drag.vb[3]]); }
+});
+window.addEventListener('pointerup', () => { if (drag && drag.moved) { svg.addEventListener('click', e => e.stopPropagation(), { capture: true, once: true }); } drag = null; svg.classList.remove('drag'); });
+document.getElementById('zin').onclick = () => zoomAt(1 / 1.6);
+document.getElementById('zout').onclick = () => zoomAt(1.6);
+document.getElementById('zreset').onclick = () => setVB([...full]);
+// accesos por zona
+const zonas = {}; P.forEach(p => { (zonas[p.municipio] ??= []).push(p.id); });
+document.getElementById('zonas').innerHTML = Object.entries(zonas).filter(([, v]) => v.length >= 9).sort((a, b) => b[1].length - a[1].length)
+  .map(([m]) => `<button class="chip" data-zona="${m}">${m}</button>`).join('');
+document.querySelectorAll('[data-zona]').forEach(b => b.onclick = () => fitTo(zonas[b.dataset.zona]));
+document.querySelectorAll('[data-show]').forEach(b => b.onclick = () => {
+  filtro = b.dataset.show; document.querySelectorAll('[data-show]').forEach(x => x.setAttribute('aria-pressed', x === b)); styleMap();
+});
+// leyenda
+document.getElementById('legend').innerHTML = `<span>Yield (t/ha)</span>
+  <div class="ramp">${RAMP.map(v => `<i style="background:var(${v})"></i>`).join('')}</div>
+  <div class="ramp-lab"><span>&lt;2.75</span><span>3.75</span><span>&gt;4.75</span></div>
+  <div class="leg-row"><span class="sw"><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--y3)" stroke="var(--panel)" stroke-width="1.5"/></svg>Training</span>
+  <span class="sw"><svg width="12" height="12"><rect x="1.5" y="1.5" width="9" height="9" rx="1" fill="var(--y3)" stroke="var(--pred)" stroke-width="2"/></svg>Blind (forecast)</span></div>`;
+// tooltip
+const tip = document.getElementById('tip'), box = document.getElementById('mapbox');
+function showTip(p, ev) {
+  if (drag && drag.moved) return; const r = box.getBoundingClientRect();
+  tip.innerHTML = `<b>${p.id}</b> · ${p.municipio}<br>${p.conjunto === 'PREDICCION' ? 'Forecast' : 'Observed'}: <span class="num">${fmt(val(p))}</span> t/ha`;
+  tip.style.left = Math.min(Math.max(ev.clientX - r.left, 80), r.width - 80) + 'px'; tip.style.top = (ev.clientY - r.top) + 'px'; tip.hidden = false;
+}
+function hideTip() { tip.hidden = true; }
+
+// ---------- parcel card ----------
+const NDVI = D.ndvi, fechas = NDVI.fechas.map(f => new Date(f + 'T00:00'));
+const promedioNDVI = fechas.map((_, i) => { const v = P.map(p => NDVI.curvas[p.id]?.[i]).filter(x => x != null); return v.reduce((a, b) => a + b, 0) / v.length; });
+function sparkline(id) {
+  const W = 300, H = 120, m = { l: 30, r: 8, t: 8, b: 20 }, c = NDVI.curvas[id] || [];
+  const x = i => m.l + i / (fechas.length - 1) * (W - m.l - m.r), y = v => H - m.b - (v - 0.1) / (0.8 - 0.1) * (H - m.t - m.b);
+  const line = a => a.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
+  const ticks = [0.2, 0.4, 0.6, 0.8].map(v => `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" class="gridl"/><text x="${m.l - 6}" y="${y(v) + 3}" text-anchor="end">${v.toFixed(1)}</text>`).join('');
+  const meses = fechas.map((f, i) => [f, i]).filter(([f], i, a) => i === 0 || f.getMonth() !== a[i - 1][0].getMonth()).filter((_, k) => k % 2 === 0)
+    .map(([f, i]) => `<text x="${x(i)}" y="${H - 4}" text-anchor="middle">${f.toLocaleString('en-US', { month: 'short' })}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" aria-label="Parcel NDVI 2025"><g class="axis">${ticks}${meses}</g>
+    <path d="${line(promedioNDVI)}" fill="none" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <path d="${line(c)}" fill="none" stroke="var(--accent)" stroke-width="2"/></svg>
+    <div class="leg-row small muted"><span class="sw"><svg width="16" height="4"><line x1="0" x2="16" y1="2" y2="2" stroke="var(--accent)" stroke-width="2"/></svg>This parcel</span><span class="sw"><svg width="16" height="4"><line x1="0" x2="16" y1="2" y2="2" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="3 3"/></svg>Mean of all 197</span></div>`;
+}
+function select(id) {
+  sel = id; const p = byId[id]; styleMap();
+  const isP = p.conjunto === 'PREDICCION';
+  document.getElementById('detail').innerHTML = `
+    <div class="leg-row"><span class="pill ${isP ? 'pr' : 'tr'}">${isP ? '■ Blind parcel' : '● Training parcel'}</span></div>
+    <div><h2>${p.id}</h2><p class="muted small">${p.municipio}, ${p.estado}</p></div>
+    <div><span class="eyebrow">${isP ? 'Forecast yield' : 'Observed yield'}</span><div class="big">${fmt(val(p))}<small>t/ha</small></div>
+      ${isP ? `<p class="small muted">80 % interval: <span class="num">${fmt(p.lo)} – ${fmt(p.hi)}</span> t/ha</p>` : `<p class="small muted">Out‑of‑sample forecast: <span class="num">${fmt(p.oof)}</span> t/ha (error ${fmt(p.oof - p.real)})</p>`}</div>
+    <dl class="dl">
+      <dt>Area</dt><dd class="num">${fmt(p.area)} ha</dd>
+      <dt>${isP ? 'Forecast production' : 'Production'}</dt><dd class="num">${fmt(val(p) * p.area, 1)} t</dd>
+      <dt>Mean elevation</dt><dd class="num">${fmt(p.elev, 0)} m</dd>
+      <dt>Mean slope</dt><dd class="num">${fmt(p.pend, 1)}°</dd>
+      <dt>Rain Apr–Oct 2025</dt><dd class="num">${fmt(p.prec, 0)} mm</dd>
+      <dt>Peak NDVI 2025</dt><dd class="num">${fmt(p.ndvimax)}</dd>
+    </dl>
+    <div><span class="eyebrow">Sentinel‑2 NDVI, 2025</span>${sparkline(id)}</div>`;
+}
+
+// ---------- importancia ----------
+(() => {
+  const s = document.getElementById('imp'), it = D.importancia.slice(0, 12), W = 520, m = { l: 236, r: 50, t: 4 }, bh = 22, gap = 10;
+  const H = m.t + it.length * (bh + gap) + 24; s.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const mx = Math.max(...it.map(d => d.imp)), x = v => (Math.max(v, 0) / mx) * (W - m.l - m.r);
+  it.forEach((d, i) => {
+    const yy = m.t + i * (bh + gap);
+    el('text', { x: m.l - 10, y: yy + bh / 2 + 4, 'text-anchor': 'end', style: 'fill:var(--ink-2)', 'font-size': 12, 'font-family': 'IBM Plex Sans, sans-serif' }, s).textContent = d.etiqueta;
+    const w = Math.max(x(d.imp), 2);
+    el('path', { d: `M${m.l},${yy}h${w - 4}a4,4 0 0 1 4,4v${bh - 8}a4,4 0 0 1 -4,4h${-(w - 4)}Z`, style: 'fill:var(--accent)' }, s);
+    el('text', { x: m.l + w + 6, y: yy + bh / 2 + 4, style: 'fill:var(--ink-3)', 'font-size': 11, 'font-family': 'IBM Plex Mono, monospace' }, s).textContent = d.imp.toFixed(3);
+  });
+  el('text', { x: m.l, y: H - 4, style: 'fill:var(--ink-3)', 'font-size': 11, 'font-family': 'IBM Plex Mono, monospace' }, s).textContent = 'RMSE increase (t/ha) when shuffled';
+})();
+
+// ---------- variables box ----------
+(() => {
+  const m = D.metricas.find(x => x.modelo === D.elegido);
+  document.getElementById('mtiles').innerHTML = [['RMSE', fmt(m.rmse, 3), 't/ha · typical error'], ['MAE', fmt(m.mae, 3), 't/ha · mean absolute error'], ['R²', fmt(m.r2, 3), 'share of variation explained']]
+    .map(([k, v, t]) => `<div class="mtile"><span>${k}</span><b>${v}</b><small>${t}</small></div>`).join('');
+  document.getElementById('varGroups').innerHTML = D.vars.map(g => `<div class="vgroup"><span class="eyebrow">${g.grupo} · ${g.items.length}</span><ul>${g.items.map(i => `<li>${i}</li>`).join('')}</ul></div>`).join('');
+})();
+
+// ---------- tabla de predicciones ----------
+const rowsP = P.filter(p => p.conjunto === 'PREDICCION').map(p => ({ ...p, ID_POLIGONO: p.id, Estado: p.estado, Municipio: p.municipio, AREA_HA: p.area, prod: p.pred * p.area }));
+let sortK = 'pred', sortDir = -1, festado = '';
+const fsel = document.getElementById('festado');
+[...new Set(rowsP.map(r => r.estado))].sort().forEach(e => fsel.insertAdjacentHTML('beforeend', `<option value="${e}">${e}</option>`));
+fsel.onchange = () => { festado = fsel.value; drawTable(); };
+function drawTable() {
+  const rs = rowsP.filter(r => !festado || r.estado === festado).sort((a, b) => (a[sortK] > b[sortK] ? 1 : a[sortK] < b[sortK] ? -1 : 0) * sortDir);
+  document.querySelector('#tpred tbody').innerHTML = rs.map(r => `<tr data-id="${r.id}"><td class="num">${r.id}</td><td>${r.estado}</td><td>${r.municipio}</td>
+    <td class="r num">${fmt(r.area)}</td><td class="r num"><span class="swatch" style="background:${colorOf(r.pred)}"></span>${fmt(r.pred)}</td>
+    <td class="r num">${fmt(r.lo)} – ${fmt(r.hi)}</td><td class="r num">${fmt(r.prod, 1)}</td></tr>`).join('');
+  document.querySelectorAll('#tpred tbody tr').forEach(tr => tr.onclick = () => { select(tr.dataset.id); fitTo([tr.dataset.id]); document.getElementById('mapa').scrollIntoView({ behavior: 'smooth' }); });
+  document.querySelectorAll('#tpred th').forEach(th => th.setAttribute('aria-sort', th.dataset.k === sortK ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'));
+}
+document.querySelectorAll('#tpred th').forEach(th => { const go = () => { const k = th.dataset.k; sortDir = sortK === k ? -sortDir : (k === 'pred' || k === 'prod' || k === 'AREA_HA' ? -1 : 1); sortK = k; drawTable(); };
+  th.onclick = go; th.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } }; });
+drawTable();
+document.getElementById('copycsv').onclick = async () => {
+  const txt = 'ID_POLIGONO,RENDIMIENTO_T_HA\n' + rowsP.slice().sort((a, b) => a.id.localeCompare(b.id)).map(r => `${r.id},${r.pred.toFixed(2)}`).join('\n');
+  const t = document.getElementById('toast');
+  try { await navigator.clipboard.writeText(txt); t.textContent = 'CSV copied (59 rows)'; }
+  catch { const ta = document.createElement('textarea'); ta.value = txt; ta.style.cssText = 'width:100%;height:120px;margin-top:8px'; t.textContent = 'Select and copy:'; t.after(ta); ta.select(); }
+};
+
+// ---------- inicio ----------
+setVB([...full]);
+const primera = rowsP.slice().sort((a, b) => b.pred - a.pred)[0]; select(primera.id);
+new ResizeObserver(() => styleMap()).observe(svg);
+</script>
