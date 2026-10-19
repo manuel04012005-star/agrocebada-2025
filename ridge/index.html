@@ -23,6 +23,8 @@
  .scroll {max-height:420px; overflow:auto;}
  input {max-width:100%; box-sizing:border-box;}
  tr.best td {font-weight:700; background:#faf8f0;}
+ .team {display:flex; flex-direction:column; gap:4px; margin-top:18px; font-size:14px;}
+ .team .uni {color:#d4b86a; font-weight:600;}
  .callout {border-left:4px solid #d4b86a; background:#faf8f0; padding:14px 18px; border-radius:4px;}
  ul {line-height:1.7;} footer {text-align:center; color:#898781; font-size:13px; padding:20px;}
  @media (max-width:600px) { .grid {grid-template-columns:1fr;} h1 {font-size:30px;} }
@@ -33,6 +35,8 @@
  <p>We trained machine learning and deep learning models on 138 barley parcels in Hidalgo, Puebla and Tlaxcala
  to estimate the 2025 yield (t/ha) of 59 blind parcels, using Sentinel-2 and Planet satellite indices,
  CHIRPS/CHIRTS climate data and INEGI topography.</p>
+ <div class="team"><span class="uni">Universidad Anáhuac Puebla</span>
+  <span>María Lucía López Ochoa · Manuel Sotos Baños · Valeria Peregrina De Sampedro · Ricardo Bañuelos Jesus</span></div>
  <div class="kpis">
   <div class="kpi"><b>59</b><span>blind parcels predicted</span></div>
   <div class="kpi"><b>Ridge regression</b><span>final model</span></div>
@@ -90,7 +94,7 @@
   </ul>
  </section>
 </div>
-<footer>Reto AgroCebada 2026 · Data: FIRA, Sentinel-2, Planet, CHIRPS, CHIRTS-ERA5, INEGI</footer>
+<footer>Universidad Anáhuac Puebla · Reto AgroCebada 2026 · Data: FIRA, Sentinel-2, Planet, CHIRPS, CHIRTS-ERA5, INEGI</footer>
 <script>
 function filter() {
   const q = document.getElementById("q").value.toLowerCase();
