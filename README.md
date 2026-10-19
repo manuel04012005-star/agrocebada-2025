@@ -2,12 +2,15 @@
 
 Forecast of the 2025 barley yield (t/ha) for the 59 blind parcels of Reto AgroCebada 2026 (Hidalgo, Puebla, Tlaxcala).
 
-**Web page:** https://manuel04012005-star.github.io/agrocebada-2025/
+**Web pages:**
+- Main page (Extra Trees): https://manuel04012005-star.github.io/agrocebada-2025/
+- Alternative page (Ridge regression, ML + deep learning comparison): https://manuel04012005-star.github.io/agrocebada-2025/ridge/
 
 Team: María Lucía López Ochoa · Manuel Sotos Baños · Valeria Peregrina De Sampedro · Ricardo Bañuelos Jesus
 
 ## Contents
 - `index.html` — interactive results page (map, variables, forecast table).
+- `ridge/index.html` — alternative results page (Ridge regression).
 - `resultados/entrega_59_parcelas.csv` — deliverable: `ID_POLIGONO, RENDIMIENTO_T_HA`.
 - `resultados/predicciones_59_parcelas.csv` — forecasts with 80 % intervals.
 - `codigo/` — Python pipeline:
